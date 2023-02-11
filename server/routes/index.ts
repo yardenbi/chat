@@ -1,9 +1,12 @@
 import express from "express";
+import { MessageController } from "../Controller/messageController";
 
-const router = express.Router();
+export const router = express.Router();
 
 router.get("/", (req, res) => {
   res.send({ response: "I am alive" }).status(200);
 });
 
-module.exports = router;
+router.get("/messages", new MessageController().getMessages);
+
+module.exports = { router };

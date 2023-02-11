@@ -1,43 +1,41 @@
-import React, { useState, useEffect } from "react";
-import socketIOClient from "socket.io-client";
-import { Input } from "./styled";
-const ENDPOINT = "http://127.0.0.1:4001";
+import React, { useEffect, useState } from "react";
+import Chat from "./components/Chat";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { Input, Modal } from "./components/styled";
+import socketio from "socket.io-client";
+import { ENDPOINT } from "./config";
+import UserNameModal from "./components/UserNameModal";
+
+const queryClient = new QueryClient();
 
 function App() {
-  const [userInput, setUserInput] = useState("");
-  const [response, setResponse] = useState("");
+  const [socket, setSocket] = useState(null);
+  const [userName, setUerName] = useState("");
+  const [isNameSet, setIsNameSet] = useState(false);
 
   useEffect(() => {
-    const socket = socketIOClient(ENDPOINT, { transports: ["websocket"] });
-    socket.on("FromAPI", (data) => {
-      setResponse(data);
-    });
-
-    return () => socket.disconnect();
+    const newSocket = socketio(ENDPOINT, { transports: ["websocket"] });
+    setSocket(newSocket);
+    return () => {
+      newSocket.disconnect();
+    };
   }, []);
 
   return (
-    <>
-      {/* <p>
-        It's <time dateTime={response}>{response}</time>
-      </p> */}
-      <div
-        style={{
-          height: "800px",
-          width: "800px",
-          margin: "0 auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          // border: "1px solid",
-        }}
-      >
-        <Input
-          value={userInput}
-          onChange={(e) => setUserInput(e.target.value)}
+    <QueryClientProvider client={queryClient}>
+      {isNameSet ? null : (
+        <UserNameModal
+          setUerName={setUerName}
+          setIsNameSet={setIsNameSet}
+          userName={userName}
+          socket={socket}
         />
+      )}
+      <div style={{ marginTop: "20px", paddingLeft: "35px" }}>
+        My Name: {userName}
+        <Chat userName={userName} socket={socket} />
       </div>
-    </>
+    </QueryClientProvider>
   );
 }
 
