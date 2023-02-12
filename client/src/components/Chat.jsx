@@ -43,8 +43,10 @@ function Chat({ userName, socket }) {
 
   const sendMessage = (e) => {
     e.preventDefault();
-    socket.emit("chat message", message);
-    setMessage("");
+    if (message) {
+      socket.emit("chat message", message);
+      setMessage("");
+    }
   };
 
   return (
